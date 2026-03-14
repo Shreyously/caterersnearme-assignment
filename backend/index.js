@@ -10,11 +10,14 @@ const app = express();
 
 const PORT = process.env.PORT || 3001;
 const MONGODB_URI = process.env.MONGODB_URI;
-// Frontend origin(s) for CORS. On Render, set to your Vercel URL (e.g. https://caterersnearme-assignment.vercel.app). Comma-separated for multiple.
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
-// Support multiple origins (comma-separated) for CORS
-const allowedOrigins = CLIENT_URL.split(",").map((s) => s.trim()).filter(Boolean);
+// Allow frontend origins: Vercel (production) and localhost (development)
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:5174",
+]
+  .filter(Boolean);
 
 app.use(
   cors({
@@ -22,8 +25,9 @@ app.use(
       // Allow requests with no origin (e.g. Postman, server-to-server)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error("Not allowed by CORS"));
+      callback(null, false);
     },
+    credentials: true,
   })
 );
 app.use(express.json());
